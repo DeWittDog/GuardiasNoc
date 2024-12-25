@@ -6,10 +6,12 @@ function verCalendario() {
   nombreUsuario = document.getElementById("nombre").value;
 
   if (nombreUsuario) {
+    // Esconde el formulario y muestra el calendario
     document.getElementById("formulario").style.display = 'none';
     document.getElementById("calendario").style.display = 'block';
 
-    // Inicializa el calendario
+    // Inicializa el calendario solo si aún no está inicializado
+    $('#calendar').fullCalendar('destroy'); // Esto destruye cualquier instancia anterior
     $('#calendar').fullCalendar({
       events: function(start, end, timezone, callback) {
         let events = [];
