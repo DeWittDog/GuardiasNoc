@@ -1,37 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Formulario de Turnos</title>
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.css" rel="stylesheet">
-  <!-- Incluye jQuery antes de cualquier script que lo use -->
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.js"></script>
-  <style>
-    #calendar {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-  </style>
-</head>
-<body>
-  <h1>Formulario de Turnos</h1>
-
-  <div id="formulario">
-    <label for="nombre">Nombre: </label>
-    <input type="text" id="nombre" placeholder="Ingresa tu nombre" required><br><br>
-    <button onclick="verCalendario()">Ver calendario</button>
-  </div>
-
-  <div id="calendario" style="display:none;">
-    <div id="calendar"></div>
-    <button onclick="registrarTurnos()">Confirmar selección</button>
-  </div>
-
-  <!-- Tu código JavaScript -->
-  <script>
+ <script>
     let nombreUsuario = '';
     let seleccionDias = [];
 
@@ -45,6 +12,8 @@
         $('#calendar').fullCalendar('destroy'); 
         $('#calendar').fullCalendar({
           defaultView: 'month', // Solo muestra el mes actual
+          selectable: true, // Permite la selección de días
+          selectHelper: true,
           events: function(start, end, timezone, callback) {
             let events = [];
             let currentMonth = moment().format('YYYY-MM');
