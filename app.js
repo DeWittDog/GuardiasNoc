@@ -104,3 +104,4 @@ function registrarTurnos() {
   document.getElementById("formulario").style.display = 'block';
   document.getElementById("calendario").style.display = 'none';
 }
+
