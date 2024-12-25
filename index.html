@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulario de Turnos</title>
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.css" rel="stylesheet">
+  <!-- Incluye jQuery antes de cualquier script que lo use -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.js"></script>
   <style>
@@ -28,6 +30,19 @@
     <button onclick="registrarTurnos()">Confirmar selección</button>
   </div>
 
-  <script src="app.js"></script>
+  <!-- Tu código JavaScript -->
+  <script>
+    function verCalendario() {
+      $('#calendario').show();
+      $('#calendar').fullCalendar({
+        // Opciones de configuración de FullCalendar
+      });
+    }
+
+    function registrarTurnos() {
+      // Aquí puedes agregar la lógica para registrar los turnos seleccionados
+      alert('Turnos registrados');
+    }
+  </script>
 </body>
 </html>
