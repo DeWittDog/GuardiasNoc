@@ -1,4 +1,4 @@
- <script>
+<script>
     let nombreUsuario = '';
     let seleccionDias = [];
 
@@ -42,14 +42,17 @@
             let turnos = JSON.parse(localStorage.getItem('turnos')) || {};
             let mesTurnos = turnos[currentMonth] || {};
 
+            // Verifica si el día ya tiene 5 personas registradas
             if (mesTurnos[selectedDate] && mesTurnos[selectedDate].turnos.length >= 5) {
               alert("No hay cupos disponibles para este día.");
               return;
             }
 
+            // Verifica si el usuario ya ha seleccionado 4 días
             if (seleccionDias.length < 4 && !seleccionDias.includes(selectedDate)) {
               seleccionDias.push(selectedDate);
               alert(`Has seleccionado ${selectedDate}`);
+              $(this).css('background-color', 'yellow'); // Marca el día seleccionado
             } else if (seleccionDias.includes(selectedDate)) {
               alert(`Ya has seleccionado este día.`);
             } else {
