@@ -1,107 +1,140 @@
-let nombreUsuario = '';
-let seleccionDias = [];
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario de Turnos</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.css" rel="stylesheet">
+  <!-- Incluye jQuery antes de cualquier script que lo use -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.js"></script>
+  <style>
+    #calendar {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Formulario de Turnos</h1>
 
-// Función para mostrar el calendario
-function verCalendario() {
-  nombreUsuario = document.getElementById("nombre").value;
+  <div id="formulario">
+    <label for="nombre">Nombre: </label>
+    <input type="text" id="nombre" placeholder="Ingresa tu nombre" required><br><br>
+    <button onclick="verCalendario()">Ver calendario</button>
+  </div>
 
-  if (nombreUsuario) {
-    // Esconde el formulario y muestra el calendario
-    document.getElementById("formulario").style.display = 'none';
-    document.getElementById("calendario").style.display = 'block';
+  <div id="calendario" style="display:none;">
+    <div id="calendar"></div>
+    <button onclick="registrarTurnos()">Confirmar selección</button>
+  </div>
 
-    // Inicializa el calendario solo si aún no está inicializado
-    $('#calendar').fullCalendar('destroy'); // Esto destruye cualquier instancia anterior
-    $('#calendar').fullCalendar({
-      events: function(start, end, timezone, callback) {
-        let events = [];
-        let currentMonth = moment().format('YYYY-MM');
+  <!-- Tu código JavaScript -->
+  <script>
+    let nombreUsuario = '';
+    let seleccionDias = [];
 
-        // Obtiene los eventos del mes actual desde localStorage
-        let turnos = JSON.parse(localStorage.getItem('turnos')) || {};
-        let mesTurnos = turnos[currentMonth] || {};
-        
-        // Convertimos los turnos a eventos del calendario
-        for (let fecha in mesTurnos) {
-          let data = mesTurnos[fecha];
-          if (data) {
-            events.push({
-              title: `${data.nombre} - ${data.turnos.length} persona(s)`,
-              start: fecha,
-              allDay: true,
-              color: data.turnos.length >= 5 ? 'red' : 'green',
-              id: fecha
-            });
+    function verCalendario() {
+      nombreUsuario = document.getElementById("nombre").value;
+
+      if (nombreUsuario) {
+        document.getElementById("formulario").style.display = 'none';
+        document.getElementById("calendario").style.display = 'block';
+
+        $('#calendar').fullCalendar('destroy'); 
+        $('#calendar').fullCalendar({
+          defaultView: 'month', // Solo muestra el mes actual
+          events: function(start, end, timezone, callback) {
+            let events = [];
+            let currentMonth = moment().format('YYYY-MM');
+
+            let turnos = JSON.parse(localStorage.getItem('turnos')) || {};
+            let mesTurnos = turnos[currentMonth] || {};
+            
+            for (let fecha in mesTurnos) {
+              let data = mesTurnos[fecha];
+              if (data) {
+                events.push({
+                  title: `${data.turnos.length} persona(s)`,
+                  start: fecha,
+                  allDay: true,
+                  color: data.turnos.length >= 5 ? 'red' : 'green',
+                  id: fecha
+                });
+              }
+            }
+
+            callback(events);
+          },
+          dayClick: function(date, jsEvent, view) {
+            let selectedDate = date.format('YYYY-MM-DD');
+            let currentMonth = moment().format('YYYY-MM');
+            let turnos = JSON.parse(localStorage.getItem('turnos')) || {};
+            let mesTurnos = turnos[currentMonth] || {};
+
+            if (mesTurnos[selectedDate] && mesTurnos[selectedDate].turnos.length >= 5) {
+              alert("No hay cupos disponibles para este día.");
+              return;
+            }
+
+            if (seleccionDias.length < 4 && !seleccionDias.includes(selectedDate)) {
+              seleccionDias.push(selectedDate);
+              alert(`Has seleccionado ${selectedDate}`);
+            } else if (seleccionDias.includes(selectedDate)) {
+              alert(`Ya has seleccionado este día.`);
+            } else {
+              alert(`Puedes seleccionar solo 4 días.`);
+            }
           }
-        }
+        });
+      } else {
+        alert("Por favor ingresa tu nombre.");
+      }
+    }
 
-        callback(events);
-      },
-      dayClick: function(date, jsEvent, view) {
-        let selectedDate = date.format();
-        if (seleccionDias.length < 4 && !seleccionDias.includes(selectedDate)) {
-          seleccionDias.push(selectedDate);
-          alert(`Has seleccionado ${date.format('YYYY-MM-DD')}`);
-        } else if (seleccionDias.includes(selectedDate)) {
-          alert(`Ya has seleccionado este día.`);
-        } else {
-          alert(`Puedes seleccionar solo 4 días.`);
+    function registrarTurnos() {
+      if (seleccionDias.length !== 4) {
+        alert("Debes seleccionar exactamente 4 días.");
+        return;
+      }
+
+      let currentMonth = moment().format('YYYY-MM');
+      let turnos = JSON.parse(localStorage.getItem('turnos')) || {};
+      let mesTurnos = turnos[currentMonth] || {};
+
+      for (let fecha in mesTurnos) {
+        let data = mesTurnos[fecha];
+        if (data.turnos.some(turno => turno.nombre === nombreUsuario)) {
+          alert("Ya te has registrado este mes.");
+          return;
         }
       }
-    });
-  } else {
-    alert("Por favor ingresa tu nombre.");
-  }
-}
 
-// Función para registrar los turnos en localStorage
-function registrarTurnos() {
-  if (seleccionDias.length !== 4) {
-    alert("Debes seleccionar exactamente 4 días.");
-    return;
-  }
+      seleccionDias.forEach(fecha => {
+        if (!mesTurnos[fecha]) {
+          mesTurnos[fecha] = { turnos: [] };
+        }
 
-  let currentMonth = moment().format('YYYY-MM');
-  let fechaTurnos = seleccionDias.map(d => moment(d).format('YYYY-MM-DD'));
+        let turnosDia = mesTurnos[fecha].turnos;
 
-  // Obtener los turnos del mes actual desde localStorage
-  let turnos = JSON.parse(localStorage.getItem('turnos')) || {};
-  let mesTurnos = turnos[currentMonth] || {};
+        if (turnosDia.length < 5) {
+          turnosDia.push({ nombre: nombreUsuario });
+          alert(`Turno registrado para el día ${fecha}`);
+        } else {
+          alert(`El día ${fecha} ya tiene el cupo completo.`);
+        }
+      });
 
-  // Verifica si ya se ha registrado el nombre este mes
-  for (let fecha in mesTurnos) {
-    let data = mesTurnos[fecha];
-    if (data.nombre === nombreUsuario) {
-      alert("Ya te has registrado este mes.");
-      return;
+      turnos[currentMonth] = mesTurnos;
+      localStorage.setItem('turnos', JSON.stringify(turnos));
+
+      document.getElementById("nombre").value = '';
+      seleccionDias = [];
+      $('#calendar').fullCalendar('destroy');
+      document.getElementById("formulario").style.display = 'block';
+      document.getElementById("calendario").style.display = 'none';
     }
-  }
-
-  // Registrar los turnos en localStorage
-  fechaTurnos.forEach(fecha => {
-    if (!mesTurnos[fecha]) {
-      mesTurnos[fecha] = { turnos: [], nombre: nombreUsuario };
-    }
-
-    let turnosDia = mesTurnos[fecha].turnos;
-
-    if (turnosDia.length < 5) {
-      turnosDia.push({ nombre: nombreUsuario });
-      alert(`Turno registrado para el día ${fecha}`);
-    } else {
-      alert(`El día ${fecha} ya tiene el cupo completo.`);
-    }
-  });
-
-  // Guardar en localStorage
-  turnos[currentMonth] = mesTurnos;
-  localStorage.setItem('turnos', JSON.stringify(turnos));
-
-  // Reset form and calendar
-  document.getElementById("nombre").value = '';
-  seleccionDias = [];
-  $('#calendar').fullCalendar('destroy');
-  document.getElementById("formulario").style.display = 'block';
-  document.getElementById("calendario").style.display = 'none';
-}
-
+  </script>
+</body>
+</html>
